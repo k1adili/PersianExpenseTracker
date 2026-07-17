@@ -42,8 +42,11 @@ class SmsReceiver : BroadcastReceiver() {
         CoroutineScope(Dispatchers.IO).launch {
             val db = AppDatabase.getInstance(appContext)
 
-            // اگر شماره حساب/کارت با یکی از حساب‌های ثبت‌شده مطابقت داشت، همان را پیشنهاد بده
-            val matchedAccount = parsed.last4Digits?.let { db.accountDao().findByLast4(it) }
+            // تلاش برای تطبیق حساب: اول با شماره‌ی فرستنده یا کلیدواژه‌ی متن (smsIdentifier/bankName)
+            // که برای اکثر پیامک‌های بانکی ایرانی قابل‌اعتمادتر از رقم‌های کارت است؛
+            // فقط اگر هیچ‌کدام تطبیق نداد و پیامک واقعاً ۴ رقم کارت داشت، از آن استفاده می‌شود.
+            val allAccounts = db.accountDao().getAllOnce()
+            val matchedAccount = findMatchingAccount(allAccounts, sender, fullBody, parsed.last4Digits)
 
             val expense = Expense(
                 amountRial = parsed.amountRial,
@@ -59,6 +62,33 @@ class SmsReceiver : BroadcastReceiver() {
             val id = db.expenseDao().insert(expense)
             showNotification(appContext, id, parsed.amountRial)
         }
+    }
+
+    private fun findMatchingAccount(
+        accounts: List<com.rialtracker.expense.data.BankAccount>,
+        sender: String,
+        body: String,
+        last4: String?
+    ): com.rialtracker.expense.data.BankAccount? {
+        val bankAccounts = accounts.filter { it.type == com.rialtracker.expense.data.AccountType.BANK }
+
+        // ۱) شماره‌ی فرستنده یا کلیدواژه‌ی تعریف‌شده توسط کاربر (smsIdentifier)
+        bankAccounts.firstOrNull { acc ->
+            acc.smsIdentifier.isNotBlank() &&
+                (sender.contains(acc.smsIdentifier, ignoreCase = true) || body.contains(acc.smsIdentifier, ignoreCase = true))
+        }?.let { return it }
+
+        // ۲) نام بانک ثبت‌شده برای حساب، اگر داخل متن پیامک آمده باشد
+        bankAccounts.firstOrNull { acc ->
+            acc.bankName.isNotBlank() && body.contains(acc.bankName, ignoreCase = true)
+        }?.let { return it }
+
+        // ۳) اگر پیامک ۴ رقم کارت داشت و حسابی با همان ۴ رقم ثبت شده (بعضی بانک‌ها این را می‌فرستند)
+        if (!last4.isNullOrBlank()) {
+            bankAccounts.firstOrNull { it.last4Digits == last4 }?.let { return it }
+        }
+
+        return null
     }
 
     private fun showNotification(context: Context, expenseId: Long, amount: Long) {

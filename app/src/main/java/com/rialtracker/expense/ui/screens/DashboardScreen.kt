@@ -14,13 +14,48 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.rialtracker.expense.data.BankAccount
 import com.rialtracker.expense.data.Category
 import com.rialtracker.expense.data.Expense
 import com.rialtracker.expense.util.NumberFormatter
 import com.rialtracker.expense.util.PersianDateUtil
+
+/** متنی که وقتی جا نمی‌شود، به‌جای دو‌خط شدن، اندازه‌ی فونتش کوچک می‌شود تا در یک خط جا شود */
+@Composable
+fun AutoSizeText(
+    text: String,
+    style: TextStyle,
+    color: Color = Color.Unspecified,
+    fontWeight: FontWeight? = null,
+    minFontSizeSp: Float = 11f,
+    modifier: Modifier = Modifier,
+    textAlign: TextAlign = TextAlign.Center
+) {
+    var fontSize by remember(text) { mutableStateOf(style.fontSize) }
+    Text(
+        text = text,
+        style = style,
+        color = color,
+        fontWeight = fontWeight,
+        fontSize = fontSize,
+        maxLines = 1,
+        softWrap = false,
+        overflow = TextOverflow.Clip,
+        textAlign = textAlign,
+        modifier = modifier,
+        onTextLayout = { result ->
+            if (result.didOverflowWidth && fontSize.value > minFontSizeSp) {
+                fontSize = (fontSize.value - 1.5f).coerceAtLeast(minFontSizeSp).sp
+            }
+        }
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -118,15 +153,25 @@ fun SummaryCard(label: String, amount: Long, color: Color, modifier: Modifier = 
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
             .background(color)
-            .padding(12.dp)
+            .padding(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(label, style = MaterialTheme.typography.labelMedium, color = Color(0xFF3A3A3A))
-        Spacer(Modifier.height(4.dp))
         Text(
-            NumberFormatter.formatAmountOnly(amount),
+            label,
+            style = MaterialTheme.typography.labelMedium,
+            color = Color(0xFF3A3A3A),
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(4.dp))
+        AutoSizeText(
+            text = NumberFormatter.formatAmountOnly(amount),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF3A3A3A)
+            color = Color(0xFF3A3A3A),
+            minFontSizeSp = 11f,
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
@@ -154,8 +199,16 @@ fun ExpenseRow(
                     .background(
                         category?.colorHex?.let { runCatching { Color(android.graphics.Color.parseColor(it)) }.getOrNull() }
                             ?: Color(0xFFE6E6E6)
-                    )
-            )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = categoryIconFor(category?.icon ?: "other"),
+                    contentDescription = category?.name,
+                    tint = Color(0xFF3A3A3A),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(category?.name ?: "بدون دسته", style = MaterialTheme.typography.bodyLarge)

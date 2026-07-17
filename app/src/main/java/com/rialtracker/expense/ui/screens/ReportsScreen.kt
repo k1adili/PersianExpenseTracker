@@ -1,6 +1,7 @@
 package com.rialtracker.expense.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -99,7 +100,12 @@ fun ReportsScreen(
             item {
                 Text("بازه‌ی زمانی", style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(8.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(androidx.compose.foundation.rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     PeriodChip("روز", period == ReportPeriod.DAY) { period = ReportPeriod.DAY }
                     PeriodChip("هفته", period == ReportPeriod.WEEK) { period = ReportPeriod.WEEK }
                     PeriodChip("ماه", period == ReportPeriod.MONTH) { period = ReportPeriod.MONTH }
@@ -110,7 +116,12 @@ fun ReportsScreen(
                 Spacer(Modifier.height(16.dp))
                 Text("گروه‌بندی بر اساس", style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(8.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(androidx.compose.foundation.rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     PeriodChip("دسته‌بندی", groupBy == GroupBy.CATEGORY) { groupBy = GroupBy.CATEGORY }
                     PeriodChip("حساب", groupBy == GroupBy.ACCOUNT) { groupBy = GroupBy.ACCOUNT }
                 }

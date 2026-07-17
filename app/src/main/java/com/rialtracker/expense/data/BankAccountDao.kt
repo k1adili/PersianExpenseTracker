@@ -23,9 +23,6 @@ interface BankAccountDao {
     @Query("SELECT * FROM accounts ORDER BY isDefault DESC, name ASC")
     suspend fun getAllOnce(): List<BankAccount>
 
-    @Query("SELECT * FROM accounts WHERE last4Digits = :last4 AND last4Digits != '' LIMIT 1")
-    suspend fun findByLast4(last4: String): BankAccount?
-
     @Query("SELECT COUNT(*) FROM accounts")
     suspend fun count(): Int
 
