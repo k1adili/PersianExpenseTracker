@@ -126,6 +126,10 @@ fun AppNavGraph(
                                 expense.copy(amountRial = amount, categoryId = catId, accountId = accId, note = note, dateEpochDay = date)
                             )
                             navController.popBackStack()
+                        },
+                        onDelete = {
+                            viewModel.deleteExpense(expense)
+                            navController.popBackStack()
                         }
                     )
                 }
@@ -180,9 +184,11 @@ fun AppNavGraph(
                     accounts = accounts,
                     smsPermissionGranted = smsPermissionGranted,
                     onRequestSmsPermission = onRequestSmsPermission,
-                    onAddCategory = { name, color -> viewModel.addCategory(name, color) },
+                    onAddCategory = { name, color, icon -> viewModel.addCategory(name, color, icon) },
+                    onUpdateCategory = { viewModel.updateCategory(it) },
                     onDeleteCategory = { viewModel.deleteCategory(it) },
-                    onAddAccount = { name, type, bank, last4, color -> viewModel.addAccount(name, type, bank, last4, color) },
+                    onAddAccount = { name, type, bank, last4, smsId, color -> viewModel.addAccount(name, type, bank, last4, smsId, color) },
+                    onUpdateAccount = { viewModel.updateAccount(it) },
                     onDeleteAccount = { viewModel.deleteAccount(it) },
                     onBackupClick = onBackupClick,
                     onRestoreClick = onRestoreClick

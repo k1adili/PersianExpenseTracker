@@ -1,6 +1,6 @@
 package com.rialtracker.expense.util
 
-import java.util.Calendar
+import java.time.LocalDate
 
 /**
  * تبدیل تقویم میلادی <-> شمسی (جلالی) بر پایه‌ی الگوریتم استاندارد jalaali
@@ -124,10 +124,14 @@ object PersianDateUtil {
         else -> if (isLeapJalaliYear(jy)) 30 else 29
     }
 
-    /** JDN برای امروز (بر اساس منطقه زمانی دستگاه) */
+    /** JDN برای امروز. عمداً از java.time.LocalDate استفاده شده، نه java.util.Calendar:
+     *  روی گوشی‌هایی که تقویم سیستم در تنظیمات روی «فارسی» گذاشته شده، Calendar.getInstance()
+     *  می‌تواند مقادیر YEAR/MONTH/DAY را از قبل به‌صورت شمسی برگرداند، که باعث می‌شد این عدد به‌اشتباه
+     *  به‌عنوان میلادی به gregorianToJdn داده شود و «امروز» و در نتیجه جمع امروز/این‌هفته اشتباه محاسبه شود.
+     *  LocalDate همیشه میلادی (ISO) برمی‌گرداند، صرف‌نظر از تقویم انتخابی کاربر در تنظیمات گوشی. */
     fun todayJdn(): Long {
-        val c = Calendar.getInstance()
-        return gregorianToJdn(c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH))
+        val today = LocalDate.now()
+        return gregorianToJdn(today.year, today.monthValue, today.dayOfMonth)
     }
 
     fun todayJalali(): JalaliDate = jdnToJalali(todayJdn())

@@ -76,16 +76,27 @@ class ExpenseViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch { repository.addCategory(Category(name = name, colorHex = colorHex, icon = icon)) }
     }
 
+    fun updateCategory(category: Category) {
+        viewModelScope.launch { repository.updateCategory(category) }
+    }
+
     fun deleteCategory(category: Category) {
         viewModelScope.launch { repository.deleteCategory(category) }
     }
 
-    fun addAccount(name: String, type: AccountType, bankName: String, last4: String, colorHex: String) {
+    fun addAccount(name: String, type: AccountType, bankName: String, last4: String, smsIdentifier: String, colorHex: String) {
         viewModelScope.launch {
             repository.addAccount(
-                BankAccount(name = name, type = type, bankName = bankName, last4Digits = last4, colorHex = colorHex)
+                BankAccount(
+                    name = name, type = type, bankName = bankName,
+                    last4Digits = last4, smsIdentifier = smsIdentifier, colorHex = colorHex
+                )
             )
         }
+    }
+
+    fun updateAccount(account: BankAccount) {
+        viewModelScope.launch { repository.updateAccount(account) }
     }
 
     fun deleteAccount(account: BankAccount) {

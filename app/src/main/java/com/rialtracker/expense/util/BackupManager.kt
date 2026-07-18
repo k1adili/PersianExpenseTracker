@@ -47,6 +47,7 @@ object BackupManager {
                 JSONObject().apply {
                     put("id", a.id); put("name", a.name); put("type", a.type.name)
                     put("bankName", a.bankName); put("last4Digits", a.last4Digits)
+                    put("smsIdentifier", a.smsIdentifier)
                     put("colorHex", a.colorHex); put("isDefault", a.isDefault)
                 }
             )
@@ -98,6 +99,7 @@ object BackupManager {
                 type = AccountType.valueOf(o.optString("type", "CASH")),
                 bankName = o.optString("bankName", ""),
                 last4Digits = o.optString("last4Digits", ""),
+                smsIdentifier = o.optString("smsIdentifier", ""),
                 colorHex = o.optString("colorHex", "#C7E9FF"),
                 isDefault = o.optBoolean("isDefault", false)
             )

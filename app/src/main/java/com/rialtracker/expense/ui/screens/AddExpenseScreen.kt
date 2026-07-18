@@ -4,11 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -37,7 +40,8 @@ fun AddExpenseScreen(
     smsRawText: String? = null,
     title: String = "ثبت هزینه‌ی جدید",
     onBack: () -> Unit,
-    onSave: (amount: Long, categoryId: Long?, accountId: Long?, note: String, dateJdn: Long) -> Unit
+    onSave: (amount: Long, categoryId: Long?, accountId: Long?, note: String, dateJdn: Long) -> Unit,
+    onDelete: (() -> Unit)? = null
 ) {
     var amountText by remember {
         mutableStateOf(if (initialAmount > 0) NumberFormatter.formatAmountOnly(initialAmount, persianDigits = false) else "")
@@ -48,6 +52,7 @@ fun AddExpenseScreen(
     var dateJdn by remember { mutableStateOf(initialDateJdn) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showError by remember { mutableStateOf(false) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -55,6 +60,13 @@ fun AddExpenseScreen(
                 title = { Text(title) },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowForward, contentDescription = "بازگشت") }
+                },
+                actions = {
+                    if (onDelete != null) {
+                        IconButton(onClick = { showDeleteConfirm = true }) {
+                            Icon(Icons.Filled.DeleteOutline, contentDescription = "حذف هزینه")
+                        }
+                    }
                 }
             )
         }
@@ -63,6 +75,7 @@ fun AddExpenseScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
             if (smsRawText != null) {
@@ -163,6 +176,7 @@ fun AddExpenseScreen(
             ) {
                 Text("ذخیره", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             }
+            Spacer(Modifier.height(16.dp))
         }
     }
 
@@ -171,6 +185,23 @@ fun AddExpenseScreen(
             initialJdn = dateJdn,
             onDismiss = { showDatePicker = false },
             onDateSelected = { dateJdn = it; showDatePicker = false }
+        )
+    }
+
+    if (showDeleteConfirm && onDelete != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("حذف هزینه") },
+            text = { Text("این هزینه برای همیشه حذف می‌شود. مطمئنید؟") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDeleteConfirm = false
+                    onDelete()
+                }) { Text("حذف", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) { Text("انصراف") }
+            }
         )
     }
 }
