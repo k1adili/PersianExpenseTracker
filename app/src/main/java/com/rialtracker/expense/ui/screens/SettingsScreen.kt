@@ -78,6 +78,13 @@ fun SettingsScreen(
                 }
                 Spacer(Modifier.height(24.dp))
 
+                Text(
+                    "برنامه نویس: کیوان عدیلی",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                
                 SectionHeader("پشتیبان‌گیری")
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     OutlinedButton(onClick = onBackupClick, modifier = Modifier.weight(1f)) {
