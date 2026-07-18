@@ -126,6 +126,10 @@ fun AppNavGraph(
                                 expense.copy(amountRial = amount, categoryId = catId, accountId = accId, note = note, dateEpochDay = date)
                             )
                             navController.popBackStack()
+                        },
+                        onDelete = {
+                            viewModel.deleteExpense(expense)
+                            navController.popBackStack()
                         }
                     )
                 }
